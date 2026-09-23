@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Semantic discovery of source-linked climate-adaptation indicators for African policy contexts."
+    />
+    <meta name="theme-color" content="#08283a" />
+    <title>Africa Adaptation Indicator Navigator</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Africa Adaptation Indicator Navigator home">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M8 12h17l7 7H15z" />
+          <path d="M8 22h17l7 7H15z" />
+          <path d="M8 32h17l7 7H15z" />
+          <circle cx="35" cy="25.5" r="5" />
+        </svg>
+        <span>Africa Adaptation Indicator Navigator</span>
+      </a>
+      <nav class="header-nav" aria-label="Primary navigation">
+        <span class="header-label">Policy evidence search</span>
+        <a href="./about.html">Sources &amp; method</a>
+      </nav>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar" aria-label="Search filters and collection overview">
+        <section class="side-card filter-card" aria-labelledby="filters-title">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Search filters</p>
+              <h2 id="filters-title">Refine results</h2>
+            </div>
+            <button id="clear-filters" class="quiet-button" type="button">Reset</button>
+          </div>
+
+          <fieldset>
+            <legend>Source scope</legend>
+            <div id="scope-filters" class="filter-options"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Framework collections</legend>
+            <div id="framework-filters" class="filter-options"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Adaptation themes</legend>
+            <div id="theme-filters" class="filter-options"></div>
+          </fieldset>
+        </section>
+
+        <section class="side-card overview-card" aria-labelledby="overview-title">
+          <div class="panel-heading compact-heading">
+            <div>
+              <p class="section-kicker">Selected collection</p>
+              <h2 id="overview-title">Source coverage</h2>
+            </div>
+            <span id="overview-total" class="overview-total"></span>
+          </div>
+          <div id="scope-summary" class="scope-summary" aria-live="polite"></div>
+          <p class="overview-caption">Definitions by framework collection</p>
+          <div id="framework-chart" class="framework-chart" role="img" aria-label="Indicator counts by framework collection"></div>
+        </section>
+      </aside>
+
+      <section class="content-column">
+        <section class="search-card" aria-labelledby="page-title">
+          <div class="search-copy">
+            <p class="section-kicker">Africa-focused discovery</p>
+            <h1 id="page-title">Find the right indicator for an African policy question.</h1>
+            <p>Describe an adaptation outcome, service, risk, or planning need. Results preserve each source's original definition and direct official link.</p>
+          </div>
+
+          <form id="search-form" class="search-form">
+            <label for="query">What do you need to measure?</label>
+            <textarea
+              id="query"
+              name="query"
+              rows="3"
+              placeholder="Example: How can countries track drought-resilient farming?"
+              required
+            ></textarea>
+            <div class="search-actions">
+              <button id="search-button" class="primary-button" type="submit">Search indicators</button>
+              <p id="status" class="status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+        </section>
+
+        <section id="results-section" class="results-panel" aria-live="polite" aria-labelledby="results-title">
+          <div class="results-heading">
+            <div>
+              <p class="section-kicker">Cross-framework results</p>
+              <h2 id="results-title">Related indicator definitions</h2>
+            </div>
+            <p id="result-count" class="result-count">Search the collection to begin.</p>
+          </div>
+          <div id="results" class="results-list"></div>
+          <div id="empty-state" class="empty-state">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M13 51V21l19-10 19 10v30" />
+              <path d="M20 51V29h24v22" />
+              <path d="M27 29v-7h10v7" />
+              <path d="M29 40h6M29 46h6" />
+            </svg>
+            <p>Search with a policy question to compare source-linked indicator definitions.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span id="corpus-count"></span>
+      <span>Includes continental African and global-reference policy sources.</span>
+      <a href="./about.html">Read collection scope and source method</a>
+    </footer>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
