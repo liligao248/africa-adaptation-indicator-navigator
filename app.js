@@ -1,5 +1,7 @@
 const RESULT_LIMIT = 8;
-const DATA_VERSION = "20260923-africa-agenda2063-v1";
+const HISTORY_LIMIT = 8;
+const SEARCH_HISTORY_KEY = "aain-search-history-v1";
+const DATA_VERSION = "20260923-history-source-links-v2";
 
 const frameworkOrder = [
   "African Union Agenda 2063",
@@ -33,6 +35,7 @@ const state = {
   embedder: null,
   embedderPromise: null,
   lastQuery: "",
+  searchHistory: [],
   ready: false,
 };
 
@@ -52,6 +55,8 @@ const elements = {
   overviewTotal: document.querySelector("#overview-total"),
   scopeSummary: document.querySelector("#scope-summary"),
   frameworkChart: document.querySelector("#framework-chart"),
+  history: document.querySelector("#search-history"),
+  clearHistory: document.querySelector("#clear-history"),
 };
 
 function escapeHtml(value) {
@@ -71,6 +76,76 @@ function setStatus(message, type = "") {
 function setBusy(isBusy) {
   elements.button.disabled = isBusy;
   elements.button.textContent = isBusy ? "Searching..." : "Search indicators";
+}
+
+function readSearchHistory() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(SEARCH_HISTORY_KEY) || "[]");
+    if (!Array.isArray(saved)) return [];
+    return saved
+      .filter((entry) => entry && typeof entry.query === "string" && entry.query.trim())
+      .map((entry) => ({ query: entry.query.trim(), searchedAt: String(entry.searchedAt || "") }))
+      .slice(0, HISTORY_LIMIT);
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveSearchHistory() {
+  try {
+    window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(state.searchHistory));
+  } catch (error) {
+    // The search still works when browser storage is unavailable.
+  }
+}
+
+function formatHistoryTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function renderSearchHistory() {
+  elements.clearHistory.hidden = state.searchHistory.length === 0;
+  if (!state.searchHistory.length) {
+    elements.history.innerHTML = '<p class="history-empty">Your recent searches will appear here.</p>';
+    return;
+  }
+  elements.history.innerHTML = state.searchHistory
+    .map(({ query, searchedAt }) => {
+      const timestamp = formatHistoryTimestamp(searchedAt);
+      return `<div class="history-item">
+        <button class="history-query" type="button" data-history-query="${escapeHtml(query)}" title="Search again: ${escapeHtml(query)}">${escapeHtml(query)}</button>
+        ${timestamp ? `<time datetime="${escapeHtml(searchedAt)}">${escapeHtml(timestamp)}</time>` : ""}
+      </div>`;
+    })
+    .join("");
+}
+
+function recordSearch(query) {
+  const normalized = query.trim();
+  if (!normalized) return;
+  state.searchHistory = [
+    { query: normalized, searchedAt: new Date().toISOString() },
+    ...state.searchHistory.filter((entry) => entry.query.toLowerCase() !== normalized.toLowerCase()),
+  ].slice(0, HISTORY_LIMIT);
+  saveSearchHistory();
+  renderSearchHistory();
+}
+
+function clearSearchHistory() {
+  state.searchHistory = [];
+  try {
+    window.localStorage.removeItem(SEARCH_HISTORY_KEY);
+  } catch (error) {
+    // The in-page history can still be cleared when browser storage is unavailable.
+  }
+  renderSearchHistory();
 }
 
 function uniqueSorted(values) {
@@ -288,6 +363,7 @@ elements.form.addEventListener("submit", (event) => {
     elements.query.focus();
     return;
   }
+  recordSearch(query);
   runSearch(query);
 });
 
@@ -299,4 +375,19 @@ document.addEventListener("change", (event) => {
 
 elements.clearFilters.addEventListener("click", selectAllFilters);
 
+elements.history.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-history-query]");
+  if (!button) return;
+  const query = button.dataset.historyQuery || "";
+  if (!query) return;
+  elements.query.value = query;
+  recordSearch(query);
+  runSearch(query);
+  elements.query.focus({ preventScroll: true });
+});
+
+elements.clearHistory.addEventListener("click", clearSearchHistory);
+
+state.searchHistory = readSearchHistory();
+renderSearchHistory();
 loadData();
